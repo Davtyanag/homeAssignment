@@ -1,0 +1,36 @@
+# xcode noise
+*.mode1v3
+*.xccheckout
+*.pbxuser
+*.perspective 
+*.perspectivev3
+*.pyc 
+*~.nib/
+build/*
+xcuserdata
+xcuserdatad/*
+*.xcuserdatad
+*.moved-aside
+DerivedData
+.idea/
+Tests/Pods
+Tests/Podfile.lock
+Tests/AFNetworking Tests.xcodeproj/xcshareddata/xcschemes/
+Carthage
+swiftStdLib
+screenshots
+screenshots/*
+metadata
+Deliverfile
+metadata/*
+# Textmate - if you build your xcode projects with it
+*.tm_build_errors
+
+# old skool
+.svn
+
+# osx noise
+.DS_Store
+_graphic
+_graphic_data
+_media

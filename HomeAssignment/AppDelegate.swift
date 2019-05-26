@@ -13,11 +13,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        window = UIWindow(frame: UIScreen.main.bounds)
+        if let window = self.window {
+            installRootViewController(window: window)
+        }
         return true
     }
+
+    private func installRootViewController(window: UIWindow) {
+        let tabBarViewController = tabBarViewControllerConfigured()
+        let navigationController = UINavigationController.init(rootViewController: tabBarViewController)
+        navigationController.isNavigationBarHidden = true
+
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
+    }
+
+    private func configureTabBar() {
+        let tabBar = UITabBar.appearance()
+        tabBar.barTintColor = UIColor.AppColors.Background
+        tabBar.shadowImage = UIImage()
+        tabBar.backgroundImage = UIImage()
+        tabBar.tintColor = UIColor.white
+    }
+
+    private func tabBarViewControllerConfigured() -> TabBarViewController {
+        configureTabBar()
+
+        let tabBarViewController = TabBarViewController()
+        return tabBarViewController
+    }
+
+    
+    
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
