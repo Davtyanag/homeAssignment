@@ -159,7 +159,7 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
     private func animatePulsatingLayer(layer: CAShapeLayer) {
         let animation = CABasicAnimation(keyPath: "transform.scale")
 
-        animation.toValue = 5.0
+        animation.toValue = 3.5
         animation.duration = 0.8
         animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         animation.autoreverses = false
