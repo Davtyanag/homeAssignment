@@ -21,19 +21,18 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
     let kChatCell = String(describing: ChatCell.classForCoder())
     let kUserCell = String(describing: UserCell.classForCoder())
 
-    var starsCountToSpend: Int = 12
-    var starsCountAlreadyHave: Int = 10
-    var lastDonationSize: Int = 0
+    private var starsCountToSpend: Int = 1020
+    private var starsCountAlreadyHave: Int = 10
+    private var lastDonationSize: Int = 0
     private let pulsingLayerName = "pulsing"
-    private let possibleColorsForLabel = [UIColor.red, UIColor.green, UIColor.blue, UIColor.white, UIColor.cyan]
+    private let possibleColorsForLabel = [UIColor.rgb(r: 28, g: 174, b: 194), UIColor.rgb(r: 34, g: 204, b: 41), UIColor.rgb(r: 255, g: 249, b: 55), UIColor.rgb(r: 203, g: 108, b: 36), UIColor.rgb(r: 249, g: 65, b: 182)]
+
+    private var fakeStarsButton: UIButton? = nil
+    private var lastCircleName: String = ""
+    var canAnimateStarsButton: Bool = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        let curvedView = CurvedView(frame: view.frame)
-//        curvedView.backgroundColor = .yellow
-//
-//        view.addSubview(curvedView)
     }
 
     override func configureTableView() {
@@ -119,12 +118,14 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
         let feed2 = Feed.init(text: "$1k Contest", imageName: "feed2", badgeValue: 0, type: .white)
         let feed3 = Feed.init(text: "Ninja", imageName: "feed3", badgeValue: 3, type: .colorful)
         let feed4 = Feed.init(text: "pokimane", imageName: "feed4", badgeValue: 7, type: .gray)
-        let feed5 = Feed.init(text: "KingOfKings", imageName: "feed5", badgeValue: 0, type: .gray)
-        return [feed1,feed2,feed3,feed4,feed5]
+        let feed5 = Feed.init(text: "DrLupo", imageName: "feed5", badgeValue: 0, type: .gray)
+        let feed6 = Feed.init(text: "KingRight", imageName: "feed5", badgeValue: 0, type: .gray)
+        return [feed1, feed2, feed3, feed4, feed5, feed6]
+        //, feed3, feed4, feed5, feed6
     }
 
     private func getMessages() -> [Message] {
-        let message1 = Message.init(name: "drg5", text: "just liked this 100 times")
+        let message1 = Message.init(name: "drg5", text: "just liked this 100 times!")
         let message2 = Message.init(name: "ninja", text: ":pepega: :pepega: :pepega:")
         let message3 = Message.init(name: "yuierro", text: "how do you even do that? :sword: :sword: :sword:")
         let message4 = Message.init(name: "picachU", text: "im gon try that! :pickachu: :pickachu: :pickachu:")
@@ -147,15 +148,18 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
     }
 
     private func setupCircleLayer(position: CGPoint) -> CAShapeLayer {
-        let layer = createCircleShapeLayer(strokeColor: .clear, fillColor: UIColor.AppColors.Yellow, position: position)
+        let layer = createCircleShapeLayer(strokeColor: .clear, fillColor: UIColor.AppColors.Yellow.withAlphaComponent(0.7), position: position)
         view.layer.addSublayer(layer)
+        if let fakeButton = fakeStarsButton {
+            view.bringSubviewToFront(fakeButton)
+        }
         return layer
     }
 
     private func animatePulsatingLayer(layer: CAShapeLayer) {
         let animation = CABasicAnimation(keyPath: "transform.scale")
 
-        animation.toValue = 3.5
+        animation.toValue = 5.0
         animation.duration = 0.8
         animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         animation.autoreverses = false
@@ -170,9 +174,8 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
         animationFade.repeatCount = 1
         animationFade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-        let animationFadeReverse = CABasicAnimation(keyPath: "opacity")
-        animationFadeReverse.fromValue = 0.6
-        animationFadeReverse.toValue = 0.2
+        let animationFadeReverse = CABasicAnimation(keyPath: "backgroundColor")
+        animationFadeReverse.toValue = UIColor.yellow.withAlphaComponent(0.1).cgColor
         animationFadeReverse.duration = 0.3
         animationFadeReverse.beginTime = 0.5
         animationFadeReverse.autoreverses = false
@@ -182,10 +185,41 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
         let group = CAAnimationGroup.init()
         group.duration = 0.8
         group.animations = [animation, animationFade, animationFadeReverse]
-        group.delegate = LayerRemover(for: layer)
+        let remover = LayerRemover(for: layer)
+        remover.removerDelegate = self
+        group.delegate = remover
 
-        layer.name = pulsingLayerName
+        layer.name = pulsingLayerName + " \(lastDonationSize)"
+        lastCircleName = layer.name ?? ""
         layer.add(group, forKey: pulsingLayerName)
+    }
+
+    private func addFakeButton(sourceButton: UIButton, center: CGPoint) {
+        let newButton = UIButton()
+        newButton.setBackgroundImage(sourceButton.backgroundImage(for:  .normal), for: .normal)
+        newButton.backgroundColor = UIColor.AppColors.Yellow
+        let size = sourceButton.frame.width
+        newButton.frame = CGRect.init(x: 0, y: 0, width: size, height: size )
+        newButton.center = center
+        newButton.rounded(radius: size / 2.0)
+        newButton.isUserInteractionEnabled = false
+        self.view.addSubview(newButton)
+        fakeStarsButton = newButton
+        canAnimateStarsButton = false
+        self.updateUserCell()
+    }
+
+    private func removeFakeButton() {
+        fakeStarsButton?.removeFromSuperview()
+        fakeStarsButton = nil
+        canAnimateStarsButton = true
+        self.updateUserCell()
+    }
+
+    private func updateUserCell() {
+        if let cell = tableView.cellForRow(at: IndexPath.init(row: 4, section: 0)) as? UserCell {
+            cell.updateCanAnimateButton(canAnimate: canAnimateStarsButton)
+        }
     }
 
     func playAnimation() {
@@ -199,9 +233,15 @@ final class VideoViewController: BaseTableViewController, AnimatableButtonDelega
             cell.updateStarsCount(starsCount: starsCountAlreadyHave, starsCountToSpend: starsCountToSpend)
             let rectOfCell = tableView.rectForRow(at: indexPath)
             let rectOfCellInSuperview = tableView.convert(rectOfCell, to: self.view)
-            let positionCalculated = CGPoint.init(x: rectOfCellInSuperview.origin.x + cell.starsButton.frame.origin.x + cell.starsButton.frame.width / 2.0, y: rectOfCellInSuperview.origin.y + cell.starsButton.frame.height / 2.0 + cell.starsButton.frame.origin.y)
-            self.generateAnimatedViews(position: positionCalculated)
-            self.animatePulsatingLayer(layer: setupCircleLayer(position: positionCalculated))
+            let positionCalculatedForNumbers = CGPoint.init(x: rectOfCellInSuperview.origin.x + cell.starsButton.frame.origin.x, y: rectOfCellInSuperview.origin.y + cell.starsButton.frame.origin.y)
+            let positionCalculatedForCircles = CGPoint.init(x: rectOfCellInSuperview.origin.x + cell.starsButton.frame.origin.x + cell.starsButton.frame.width / 2.0, y: rectOfCellInSuperview.origin.y + cell.starsButton.frame.height / 2.0 + cell.starsButton.frame.origin.y)
+            delay(delay: 0.2) {
+                if self.fakeStarsButton == nil {
+                    self.addFakeButton(sourceButton: cell.starsButton, center: positionCalculatedForCircles)
+                }
+            }
+            self.generateAnimatedViews(position: positionCalculatedForNumbers)
+            self.animatePulsatingLayer(layer: setupCircleLayer(position: positionCalculatedForCircles))
         }
 
         if let cell = tableView.cellForRow(at: IndexPath.init(row: 1, section: 0)) as? DescriptionCell {
@@ -214,13 +254,32 @@ extension VideoViewController {
 
     private func getColorAndSizeForLabel(count: Int) -> (UIColor,Int) {
         let countOfColors = possibleColorsForLabel.count
-        return (possibleColorsForLabel[count % countOfColors], 15 + 2*(count % 10))
+        return (possibleColorsForLabel[count % countOfColors], Int(screenSize.width * 0.05 + 1.5*CGFloat(min(10,count))))
+    }
+
+    private func offsetFor(count: Int) -> CGFloat {
+        switch count%10 {
+        case 1, 7:
+            return -screenSize.width * 0.012
+        case 2, 8:
+            return -screenSize.width * 0.024
+        case 3:
+            return -screenSize.width * 0.036
+        case 4, 0:
+            return screenSize.width * 0.09
+        case 5, 9:
+            return screenSize.width * 0.08
+        case 6:
+            return screenSize.width * 0.085
+        default:
+            return 0.0
+        }
     }
 
     private func generateAnimatedViews(position: CGPoint) {
         let layers = view.layer.sublayers ?? []
         if layers.contains(where: { (layer) -> Bool in
-            return layer.name == pulsingLayerName
+            return (layer.name ?? "").contains(pulsingLayerName)
         }) {
             lastDonationSize += 1
         } else {
@@ -232,11 +291,17 @@ extension VideoViewController {
         label.font = UIFont.systemFont(ofSize: CGFloat(sizeOfFont), weight: .semibold)
         label.textColor = color
         label.text = "+\(lastDonationSize)"
-        label.frame = CGRect(x: 0, y: 0, width: 80.0, height: 80.0)
+        label.adjustsFontSizeToFitWidth = true
+        label.textAlignment = .center
+        label.minimumScaleFactor = 0.5
+        label.backgroundColor = UIColor.clear
+        label.frame = CGRect(x: 0, y: 0, width: screenSize.width * 0.18, height: screenSize.width * 0.15)
+
+        let chngedPosition = CGPoint(x: position.x + offsetFor(count: lastDonationSize),y: position.y)
 
         let animation = CAKeyframeAnimation(keyPath: "position")
-        animation.path = customPath(initialPosition: position).cgPath
-        animation.duration = 1.0
+        animation.path = customPath(initialPosition: chngedPosition).cgPath
+        animation.duration = 1.5
         animation.fillMode = CAMediaTimingFillMode.forwards
         animation.isRemovedOnCompletion = false
         animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeOut)
@@ -244,20 +309,30 @@ extension VideoViewController {
         let animationFade = CABasicAnimation(keyPath: "opacity")
         animationFade.fromValue = 1.0
         animationFade.toValue = 0.2
-        animationFade.duration = 0.5
-        animationFade.beginTime = 0.5
+        animationFade.duration = 0.7
+        animationFade.beginTime = 0.3
         animationFade.autoreverses = false
         animationFade.repeatCount = 1
+        animationFade.fillMode = CAMediaTimingFillMode.forwards
         animationFade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
         let group = CAAnimationGroup.init()
-        group.duration = 1.0
+        group.duration = 1.5
+        group.fillMode = CAMediaTimingFillMode.forwards
         group.animations = [animation, animationFade]
 
         label.layer.add(group, forKey: "groupKey")
         view.addSubview(label)
-        delay(delay: 0.9) {
+        delay(delay: 1.2) {
             label.removeFromSuperview()
+        }
+    }
+}
+
+extension VideoViewController: LayerRemoverDelegate {
+    func removedLayer(name: String) {
+        if name == lastCircleName {
+            removeFakeButton()
         }
     }
 }
@@ -267,23 +342,8 @@ func customPath(initialPosition: CGPoint) -> UIBezierPath {
 
     path.move(to: CGPoint(x: initialPosition.x, y: initialPosition.y))
 
-    let endPoint = CGPoint(x: initialPosition.x, y: UIScreen.main.bounds.height * 0.2)
-    let randValue = drand48()
-    let randomXShift: Double = randValue * 200.0
-    let cp1 = CGPoint(x: Double(initialPosition.x) - randomXShift, y: Double(UIScreen.main.bounds.height * 0.8))
-    let cp2 = CGPoint(x: Double(initialPosition.x) + randomXShift, y: Double(UIScreen.main.bounds.height * 0.7))
+    let endPoint = CGPoint(x: initialPosition.x, y: UIScreen.main.bounds.height * 0.4)
 
-    path.addCurve(to: endPoint, controlPoint1: cp1, controlPoint2: cp2)
+    path.addLine(to: endPoint)
     return path
-}
-
-class CurvedView: UIView {
-
-    override func draw(_ rect: CGRect) {
-        //do some fancy curve drawing
-        let path = customPath(initialPosition: CGPoint(x: 350, y: 560))
-        path.lineWidth = 3
-        path.stroke()
-    }
-
 }

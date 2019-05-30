@@ -15,13 +15,10 @@ class ChatCell: BaseCell  {
 
     var chatSize: CGFloat {
         switch Device.size() {
-        case .screen4Inch:    return 80.0
-        case .screen4_7Inch:  return 110.0
-        case .screen5_5Inch:  return 110.0
-        case .screen5_8Inch:  return 140.0
-        case .screen6_1Inch:  return 180.0
-        case .screen6_5Inch:  return 180.0
-        default:              return 110.0
+        case .screen4Inch:    return 0.28 * screenSize.width
+        case .screen4_7Inch:  return 0.28 * screenSize.width
+        case .screen5_5Inch:  return 0.28 * screenSize.width
+        default:              return 0.4 * screenSize.width
         }
     }
 
@@ -45,10 +42,10 @@ class ChatCell: BaseCell  {
         self.removeLayer()
         let gradientLayer = CAGradientLayer()
         gradientLayer.name = gradientLayerName
-        gradientLayer.colors = [colorBottom.cgColor, colorTop.cgColor]
+        gradientLayer.colors = [colorBottom.cgColor ,colorTop.cgColor]
         gradientLayer.startPoint = CGPoint(x: 0.0, y: 1.0)
         gradientLayer.endPoint = CGPoint(x: 0.0, y: 0.0)
-        gradientLayer.locations = [0, 1]
+        gradientLayer.locations = [0.3, 1.0]
         gradientLayer.frame = downOverlay.bounds
         downOverlay.layer.insertSublayer(gradientLayer, at: 0)
     }
@@ -63,22 +60,23 @@ class ChatCell: BaseCell  {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-
-        self.setGradientBackground(colorTop: UIColor.clear, colorBottom: UIColor.AppColors.Background)
-        
+        self.setGradientBackground(colorTop: UIColor.AppColors.Background.withAlphaComponent(0.01), colorBottom: UIColor.AppColors.Background.withAlphaComponent(0.99))
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         self.backgroundColor = UIColor.clear
-        contentView.backgroundColor = UIColor.clear
+        contentView.backgroundColor = UIColor.AppColors.Background
 
         contentView.addSubview(tableView)
         tableView.registerForCells(cells: [TextCell.classForCoder()])
         tableView.dataSource = self
         tableView.delegate = self
 
+        let offset = 0.025 * screenSize.width
+        tableView.contentInset = UIEdgeInsets.init(top: offset, left: 0.0, bottom: offset, right: 0.0)
+        tableView.contentOffset = CGPoint.init(x: 0.0, y: -offset)
 
         contentView.addSubview(downOverlay)
 
@@ -114,7 +112,7 @@ class ChatCell: BaseCell  {
                 make.bottom.equalToSuperview()
                 make.left.equalToSuperview()
                 make.right.equalToSuperview()
-                make.height.equalTo(25.0)
+                make.height.equalTo(screenSize.width * 0.06)
             }
         }
 

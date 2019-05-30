@@ -19,10 +19,15 @@ class UserCell: BaseCell {
     private var starsCountToSpend: Int = 0
 
     private var starsIconSize:CGFloat = 15.0
-    private let starsButtonSize: CGFloat = 65.0
-    private let userImageSize: CGFloat = 50.0
+    private var starsButtonSize: CGFloat {
+        return screenSize.width * 0.137
+    }
+    private var userImageSize: CGFloat {
+        return screenSize.width * 0.11
+    }
     private let addButtonSize: CGFloat = 20.0
-
+    private var canAnimateStarsButton: Bool = true
+    private var stopAnimation: Bool = false
 
     var userImageView: UIImageView = {
         let view = UIImageView()
@@ -34,7 +39,7 @@ class UserCell: BaseCell {
         let view = UILabel()
         view.backgroundColor = UIColor.clear
         view.textColor = UIColor.white
-        view.font = UIFont.systemFont(ofSize: 17.0, weight: .medium)
+        view.font = UIFont.systemFont(ofSize: 0.039 * screenSize.width, weight: .medium)
         view.numberOfLines = 1
         return view
     }()
@@ -42,7 +47,7 @@ class UserCell: BaseCell {
     var bottomLabel: UILabel = {
         let view = UILabel()
         view.backgroundColor = UIColor.clear
-        view.font = UIFont.systemFont(ofSize: 14.0, weight: .regular)
+        view.font = UIFont.systemFont(ofSize: 0.032 * screenSize.width, weight: .regular)
         view.textColor = UIColor.grayColorWithUniversalInt(value: 200)
         return view
     }()
@@ -59,7 +64,7 @@ class UserCell: BaseCell {
     var starsLabel: UILabel = {
         let view = UILabel()
         view.textColor = UIColor.AppColors.Yellow
-        view.font = UIFont.systemFont(ofSize: 15.0, weight: .regular)
+        view.font = UIFont.systemFont(ofSize: 0.034 * screenSize.width, weight: .regular)
         view.text = "20"
         return view
     }()
@@ -73,6 +78,7 @@ class UserCell: BaseCell {
     var commentsIcon: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = UIColor.clear
+        view.contentMode = .scaleToFill
         view.image = UIImage.init(named: "comments")
         return view
     }()
@@ -80,7 +86,7 @@ class UserCell: BaseCell {
     var commentsLabel: UILabel = {
         let view = UILabel()
         view.textColor = UIColor.grayColorWithUniversalInt(value: 200)
-        view.font = UIFont.systemFont(ofSize: 15.0, weight: .regular)
+        view.font = UIFont.systemFont(ofSize: 0.032 * screenSize.width, weight: .regular)
         view.text = "0.0k"
         return view
     }()
@@ -94,6 +100,7 @@ class UserCell: BaseCell {
     var shareIcon: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = UIColor.clear
+        view.contentMode = .scaleToFill
         view.image = UIImage.init(named: "share")
         return view
     }()
@@ -101,7 +108,7 @@ class UserCell: BaseCell {
     var shareLabel: UILabel = {
         let view = UILabel()
         view.textColor = UIColor.grayColorWithUniversalInt(value: 200)
-        view.font = UIFont.systemFont(ofSize: 15.0, weight: .regular)
+        view.font = UIFont.systemFont(ofSize: 0.032 * screenSize.width, weight: .regular)
         view.text = "Share"
         return view
     }()
@@ -115,7 +122,7 @@ class UserCell: BaseCell {
 
     var addButton: UIButton = {
         let view = UIButton()
-        view.backgroundColor = UIColor.grayColorWithUniversalInt(value: 150)
+        view.backgroundColor = UIColor.rgb(r: 111, g: 83, b: 251)
         view.setBackgroundImage(UIImage.init(named: "add"), for: .normal)
         return view
     }()
@@ -211,12 +218,22 @@ class UserCell: BaseCell {
     }
 
     @objc func starsTap() {
-        self.animateStarsButtonSize()
+        if canAnimateStarsButton  && !stopAnimation {
+            stopAnimation = true
+            delay(delay: 0.5) {
+                self.stopAnimation = false
+            }
+            self.animateStarsButtonSize()
+        }
         if starsCountToSpend > 0{
             delay(delay: 0.2) {
                 self.delegate?.playAnimation()
             }
         }
+    }
+
+    func updateCanAnimateButton(canAnimate: Bool) {
+        canAnimateStarsButton = canAnimate
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -230,10 +247,12 @@ class UserCell: BaseCell {
             contentView.bounds = CGRect(x: 0.0, y: 0.0, width: 9999.0, height: 9999.0)
 
             userImageView.snp.remakeConstraints { make in
-                make.centerY.equalToSuperview().inset(7.0)
-                make.left.equalToSuperview().inset(20.0)
-                make.height.equalTo(50.0)
-                make.width.equalTo(50.0)
+                let topInset = screenSize.width * 0.05
+                make.top.equalToSuperview().inset(topInset)
+                make.bottom.equalToSuperview().inset(topInset).priority(250.0)
+                make.left.equalToSuperview().inset(screenSize.width * 0.038)
+                make.height.equalTo(userImageSize)
+                make.width.equalTo(userImageSize)
             }
 
             addButton.snp.remakeConstraints { make in
@@ -244,78 +263,77 @@ class UserCell: BaseCell {
             }
 
             topLabel.snp.remakeConstraints { make in
-                make.top.equalTo(userImageView.snp.top)
-                make.left.equalTo(userImageView.snp.right).inset(-5.0)
-                make.height.equalTo(25.0)
+                make.top.equalTo(userImageView.snp.top).inset(0.008 * screenSize.width)
+                make.left.equalTo(userImageView.snp.right).inset(-0.025 * screenSize.width)
+                make.height.equalTo(0.042 * screenSize.width)
             }
 
             verifiedButton.snp.remakeConstraints { make in
                 make.centerY.equalTo(topLabel.snp.centerY)
-                make.left.equalTo(topLabel.snp.right).inset(-5.0)
-                make.height.equalTo(20.0)
+                make.left.equalTo(topLabel.snp.right).inset(-0.022 * screenSize.width)
+                make.height.equalTo(0.04 * screenSize.width)
                 make.right.lessThanOrEqualTo(shareIcon.snp.left)
-                make.width.equalTo(20.0)
+                make.width.equalTo(0.04 * screenSize.width)
             }
 
             bottomLabel.snp.remakeConstraints { make in
-                make.top.equalTo(topLabel.snp.bottom)
+                make.top.equalTo(topLabel.snp.bottom).inset(-0.022 * screenSize.width)
                 make.left.equalTo(topLabel)
                 make.right.equalTo(shareLabel.snp.left)
                 make.height.equalTo(topLabel.snp.height)
             }
 
             starsButton.snp.remakeConstraints { make in
-                make.top.equalToSuperview().inset(5.0)
-                make.bottom.equalToSuperview().inset(20).priority(999.0)
-                make.right.equalToSuperview().inset(24.0)
+                make.top.equalToSuperview().inset(0.017 * screenSize.width)
+                make.right.equalToSuperview().inset(0.043 * screenSize.width)
                 make.height.equalTo(starsButtonSize)
                 make.width.equalTo(starsButtonSize)
             }
 
             starsLabel.snp.remakeConstraints { make in
                 make.centerX.equalTo(starsButton.snp.centerX)
-                make.top.equalTo(starsButton.snp.bottom).inset(-5.0)
-                make.height.equalTo(20.0)
+                make.top.equalTo(starsButton.snp.bottom).inset(-0.025 * screenSize.width)
+                make.height.equalTo(0.038 * screenSize.width)
             }
 
             commentsButton.snp.remakeConstraints { make in
                 make.centerY.equalTo(starsButton.snp.centerY)
-                make.right.equalTo(starsButton.snp.left).inset(-5.0)
-                make.height.equalTo(80.0)
-                make.width.equalTo(45.0)
+                make.right.equalTo(starsButton.snp.left).inset(-0.04 * screenSize.width)
+                make.height.equalTo(1.6 * screenSize.width)
+                make.width.equalTo(0.075 * screenSize.width)
             }
 
             commentsIcon.snp.remakeConstraints { make in
-                make.centerY.equalTo(starsButton.snp.centerY)
+                make.centerY.equalTo(starsButton.snp.centerY).inset(-0.004 * screenSize.width)
                 make.centerX.equalTo(commentsButton.snp.centerX)
-                make.height.equalTo(25.0)
-                make.width.equalTo(25.0)
+                make.height.equalTo(0.045 * screenSize.width)
+                make.width.equalTo(0.045 * screenSize.width)
             }
 
             commentsLabel.snp.remakeConstraints { make in
-                make.top.equalTo(commentsIcon.snp.bottom).inset(-5.0)
+                make.centerY.equalTo(bottomLabel.snp.centerY)
                 make.centerX.equalTo(commentsButton.snp.centerX)
-                make.height.equalTo(20.0)
+                make.height.equalTo(0.038 * screenSize.width)
             }
 
             shareButton.snp.remakeConstraints { make in
                 make.centerY.equalTo(starsButton.snp.centerY)
-                make.right.equalTo(commentsButton.snp.left).inset(5.0)
-                make.height.equalTo(80.0)
-                make.width.equalTo(45.0)
+                make.right.equalTo(commentsButton.snp.left).inset(-0.04 * screenSize.width)
+                make.height.equalTo(commentsButton.snp.height)
+                make.width.equalTo(commentsButton.snp.width)
             }
 
             shareIcon.snp.remakeConstraints { make in
-                make.centerY.equalTo(starsButton.snp.centerY)
+                make.centerY.equalTo(commentsIcon.snp.centerY)
                 make.centerX.equalTo(shareButton.snp.centerX)
-                make.height.equalTo(25.0)
-                make.width.equalTo(25.0)
+                make.height.equalTo(commentsIcon.snp.height)
+                make.width.equalTo(commentsIcon.snp.width)
             }
 
             shareLabel.snp.remakeConstraints { make in
-                make.top.equalTo(commentsIcon.snp.bottom).inset(-5.0)
+                make.centerY.equalTo(bottomLabel.snp.centerY)
                 make.centerX.equalTo(shareButton.snp.centerX)
-                make.height.equalTo(20.0)
+                make.height.equalTo(0.038 * screenSize.width)
             }
 
         }

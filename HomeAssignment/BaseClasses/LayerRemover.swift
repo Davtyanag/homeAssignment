@@ -9,7 +9,13 @@
 import Foundation
 import QuartzCore
 
+protocol LayerRemoverDelegate: class {
+    func removedLayer(name: String)
+}
+
 class LayerRemover: NSObject, CAAnimationDelegate {
+
+    weak var removerDelegate: LayerRemoverDelegate? = nil
     private weak var layer: CALayer?
 
     init(for layer: CALayer) {
@@ -18,6 +24,7 @@ class LayerRemover: NSObject, CAAnimationDelegate {
     }
 
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        removerDelegate?.removedLayer(name: layer?.name ?? "")
         layer?.removeFromSuperlayer()
     }
 }

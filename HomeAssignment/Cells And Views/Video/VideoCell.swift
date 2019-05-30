@@ -14,14 +14,13 @@ class VideoCell: BaseCell {
 
     private var player: AVPlayer?
     private var fileName: String = ""
-    private var videoAspect: CGFloat {
+    private var videoAspect: CGFloat  {
         switch Device.size() {
-        case .screen4Inch:    return 0.55
-        case .screen4_7Inch:  return 0.6
-        case .screen5_5Inch:  return 0.75
-        case .screen5_8Inch:  return 0.8
-        case .screen6_1Inch:  return 0.8
-        case .screen6_5Inch:  return 0.8
+        case .screen4Inch:    return 0.66
+        case .screen4_7Inch:  return 0.69
+        case .screen5_5Inch:  return 0.69
+        case .screen6_1Inch:  return 0.82
+        case .screen6_5Inch:  return 0.82
         default:              return 0.8
         }
     }
@@ -39,7 +38,7 @@ class VideoCell: BaseCell {
 
     var descriptionBackGround: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        view.backgroundColor = UIColor.rgb(r: 50, g: 61, b: 65).withAlphaComponent(0.85)
         return view
     }()
 
@@ -47,7 +46,7 @@ class VideoCell: BaseCell {
         let view = UILabel()
         view.backgroundColor = UIColor.clear
         view.textColor = UIColor.white
-        view.font = UIFont.systemFont(ofSize: 17.0, weight: .medium)
+        view.font = UIFont.systemFont(ofSize: 0.037 * screenSize.width, weight: .semibold)
         view.numberOfLines = 1
         return view
     }()
@@ -55,7 +54,7 @@ class VideoCell: BaseCell {
     var bottomLabel: UILabel = {
         let view = UILabel()
         view.backgroundColor = UIColor.clear
-        view.font = UIFont.systemFont(ofSize: 14.0, weight: .regular)
+        view.font = UIFont.systemFont(ofSize: 0.032 * screenSize.width, weight: .regular)
         view.textColor = UIColor.white
         return view
     }()
@@ -107,8 +106,8 @@ class VideoCell: BaseCell {
 
     private func updateBottomLabel() {
 
-        let firstAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.AppColors.Yellow]
-        let secondAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white]
+        let firstAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.AppColors.Yellow, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 0.034 * screenSize.width, weight: .semibold)]
+        let secondAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 0.032 * screenSize.width, weight: .regular)]
 
         let firstString = NSMutableAttributedString(string: prizeText, attributes: firstAttributes)
         let (h,m,s) = secondsToHoursMinutesSeconds(seconds: videoDuration)
@@ -169,18 +168,18 @@ class VideoCell: BaseCell {
                 make.bottom.equalToSuperview()
                 make.left.equalToSuperview()
                 make.right.equalToSuperview()
-                make.height.equalTo(height * 0.3)
+                make.height.equalTo(height * 0.269)
             }
 
             topLabel.snp.remakeConstraints { make in
-                make.top.equalTo(descriptionBackGround).inset(height * 0.06)
-                make.left.equalTo(descriptionBackGround).inset(20.0)
-                make.right.equalTo(descriptionBackGround).inset(40.0)
+                make.top.equalTo(descriptionBackGround).inset(height * 0.04)
+                make.left.equalTo(descriptionBackGround).inset(0.048 * screenSize.width)
+                make.right.equalTo(descriptionBackGround).inset(0.1 * screenSize.width)
                 make.height.equalTo(height * 0.1)
             }
 
             bottomLabel.snp.remakeConstraints { make in
-                make.top.equalTo(topLabel.snp.bottom)
+                make.top.equalTo(topLabel.snp.bottom).inset(height * 0.01)
                 make.left.equalTo(topLabel)
                 make.right.equalTo(topLabel)
                 make.height.equalTo(topLabel.snp.height)
@@ -188,7 +187,7 @@ class VideoCell: BaseCell {
 
             chevron.snp.remakeConstraints { make in
                 make.centerY.equalToSuperview()
-                make.right.equalToSuperview().inset(10.0)
+                make.right.equalToSuperview().inset(0.04 * screenSize.width)
                 make.height.equalTo(height * 0.05)
                 make.width.equalTo(height * 0.05)
             }

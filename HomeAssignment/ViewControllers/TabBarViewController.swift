@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Device
 
 final class TabBarViewController: UITabBarController {
 
@@ -38,11 +39,18 @@ final class TabBarViewController: UITabBarController {
         self.tabBarController(self, didSelect: self.viewControllers![2])
     }
 
+
+    private var imageInsetSize: CGFloat {
+        switch Device.size() {
+        case .screen5_8Inch:  return screenSize.width * 0.03
+        default:              return 7.0
+        }
+    }
+
     private func viewControllerForTab(type: TabBarType) -> BaseTableViewController {
         let viewController = type == .video ? VideoViewController() : BaseTableViewController()
         viewController.view.backgroundColor = UIColor.AppColors.Background
 
-        let imageInsetSize:CGFloat = 5.0
         let image = UIImage(named: type.rawValue)
         let tabBarItem = UITabBarItem.init(title: nil, image: image, selectedImage: image)
         tabBarItem.imageInsets = UIEdgeInsets(top: imageInsetSize, left: 0, bottom: -imageInsetSize, right: 0)

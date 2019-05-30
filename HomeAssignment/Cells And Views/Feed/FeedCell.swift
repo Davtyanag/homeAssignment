@@ -48,7 +48,7 @@ class FeedCell: BaseCell {
                 make.bottom.equalToSuperview().priority(999.0)
                 make.left.equalToSuperview()
                 make.right.equalToSuperview()
-                make.height.equalTo(100.0)
+                make.height.equalTo(screenSize.width * 0.221)
             }
         }
         super.updateConstraints()

@@ -8,7 +8,10 @@
 
 import UIKit
 
+let screenSize = UIScreen.main.bounds
+
 @UIApplicationMain
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?

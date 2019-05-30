@@ -50,29 +50,37 @@ class TextCell: BaseCell {
     let supportedSmiles: [String] = [":pepega:", ":pickachu:", ":sword:"]
 
     func setMessage(message: Message) {
-        let nameAttribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.AppColors.White]
-        let textAttribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.grayColorWithUniversalInt(value: 180), .font: UIFont.systemFont(ofSize: 14.0, weight: .regular)]
+        let nameAttribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.AppColors.White, .font: UIFont.systemFont(ofSize: 0.038 * screenSize.width, weight: .bold)]
+        let textAttribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.grayColorWithUniversalInt(value: 200), .font: UIFont.systemFont(ofSize: 0.037 * screenSize.width, weight: .regular)]
         let numberAttribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.AppColors.Yellow]
 
 
         let firstString = NSMutableAttributedString(string: message.name + "   ", attributes: nameAttribute)
         let splitedArray = message.text.split(separator: " ")
+        var hasAnyTextBeforeSmile: Bool = false
         for string in splitedArray {
             let str = String(string)
             if str.isNumber {
-                let secondString = NSAttributedString(string: " \(str) ", attributes: numberAttribute)
+                hasAnyTextBeforeSmile = true
+                let space = NSAttributedString(string: " ", attributes: textAttribute)
+                firstString.append(space)
+                let secondString = NSAttributedString(string: "\(str)", attributes: numberAttribute)
                 firstString.append(secondString)
             } else if supportedSmiles.contains(str) {
+                if hasAnyTextBeforeSmile {
+                    let space = NSAttributedString(string: "  ", attributes: textAttribute)
+                    firstString.append(space)
+                }
+                hasAnyTextBeforeSmile = true
                 let imageAttachment = NSTextAttachment()
-                imageAttachment.bounds = CGRect.init(x: 0, y: -5, width: 25.0, height: 25.0)
+                let imageSize = 0.06 * screenSize.width
+                imageAttachment.bounds = CGRect.init(x: 0, y: -0.015 * screenSize.width, width: imageSize, height: imageSize)
                 imageAttachment.image = UIImage(named: str.replacingOccurrences(of: ":", with: ""))
                 let image1String = NSAttributedString(attachment: imageAttachment)
                 firstString.append(image1String)
-                let space = NSAttributedString(string: "  ", attributes: textAttribute)
-                firstString.append(space)
-
             } else {
-                let secondString = NSAttributedString(string: " \(str) ", attributes: textAttribute)
+                hasAnyTextBeforeSmile = true
+                let secondString = NSAttributedString(string: " \(str)", attributes: textAttribute)
                 firstString.append(secondString)
             }
         }
@@ -115,8 +123,8 @@ class TextCell: BaseCell {
             titleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
             titleLabel.snp.remakeConstraints { make in
-                make.leading.equalToSuperview().inset(20.0)
-                make.top.equalToSuperview().inset(5.0)
+                make.leading.equalToSuperview().inset(0.048 * screenSize.width)
+                make.top.equalToSuperview().inset(0.012 * screenSize.width)
                 make.bottom.equalToSuperview().inset(0.0)
                 make.trailing.equalToSuperview().inset(0.0)
             }

@@ -59,6 +59,10 @@ class BaseTableViewController: UIViewController {
         view.setNeedsUpdateConstraints()
     }
 
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+
     public override func updateViewConstraints() {
         super.updateViewConstraints()
         didSetupConstraints = false

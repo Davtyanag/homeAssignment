@@ -34,7 +34,7 @@ class FeedItem: UICollectionViewCell {
         let view = UILabel()
         view.textAlignment = .center
         view.backgroundColor = UIColor.clear
-        view.font = UIFont.systemFont(ofSize: 13.0)
+        view.font = UIFont.systemFont(ofSize: screenSize.width*0.03)
         view.textColor = UIColor.white
         view.text = "0"
         return view
@@ -44,13 +44,23 @@ class FeedItem: UICollectionViewCell {
         let view = UILabel()
         view.textAlignment = .center
         view.backgroundColor = UIColor.clear
-        view.font = UIFont.systemFont(ofSize: 13.0)
+        view.font = UIFont.systemFont(ofSize: fontSize)
         view.textColor = UIColor.grayColorWithUniversalInt(value: 200)
         view.text = "Item"
         return view
     }()
 
-    let buttonSize: CGFloat = 55.0
+    class var buttonSize: CGFloat {
+        return screenSize.width * 0.122
+    }
+
+    class var buttonWithBadgeSize: CGFloat {
+        return buttonSize + 0.25*buttonSize
+    }
+
+    class var fontSize: CGFloat {
+        return 0.032 * screenSize.width
+    }
 
 
     var didSetupConstraints: Bool = false
@@ -65,16 +75,20 @@ class FeedItem: UICollectionViewCell {
     }
 
     private func configureText(feed: Feed) {
-        self.label.text = feed.text
+        label.text = feed.text
+
         var textColor = UIColor.grayColorWithUniversalInt(value: 180)
+        var font = UIFont.systemFont(ofSize: FeedItem.fontSize)
         switch feed.type {
         case .white:
             textColor = UIColor.grayColorWithUniversalInt(value: 250)
+            font = UIFont.systemFont(ofSize: FeedItem.fontSize, weight: .medium)
         case .gray:
             textColor = UIColor.grayColorWithUniversalInt(value: 100)
         case .colorful:
             textColor = UIColor.grayColorWithUniversalInt(value: 180)
         }
+        self.label.font = font
         self.label.textColor = textColor
     }
 
@@ -101,12 +115,13 @@ class FeedItem: UICollectionViewCell {
         self.addSubview(bgView)
 
         self.addSubview(imageView)
-        imageView.rounded(radius: buttonSize*0.4)
+        imageView.rounded(radius: FeedItem.buttonSize*0.4)
         self.addSubview(label)
         self.addSubview(badgeImage)
-        badgeImage.rounded(radius: buttonSize*0.2)
+        badgeImage.rounded(radius: FeedItem.buttonSize*0.165)
         self.addSubview(badgeLabel)
         self.backgroundColor = UIColor.yellow
+        self.contentView.backgroundColor = UIColor.clear
         setNeedsUpdateConstraints()
         updateConstraintsIfNeeded()
     }
@@ -127,7 +142,7 @@ class FeedItem: UICollectionViewCell {
             case .white:
                 colors = [UIColor.AppColors.White, UIColor.AppColors.White]
             }
-            bgView.setBorder(cornerRadius: buttonSize / 2.0, colors: colors, lineWidth: 2, direction: .horizontal)
+            bgView.setBorder(cornerRadius: FeedItem.buttonSize / 2.0, colors: colors, lineWidth: 2, direction: .horizontal)
         }
 
     }
@@ -139,18 +154,17 @@ class FeedItem: UICollectionViewCell {
             contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             contentView.bounds = CGRect(x: 0.0, y: 0.0, width: 9999.0, height: 9999.0)
 
+            let buttonSize = FeedItem.buttonSize
+
             label.snp.remakeConstraints { make in
-                make.bottom.equalToSuperview().inset(10.0)
-                make.left.equalToSuperview()
-                make.right.equalToSuperview()
-                make.height.equalTo(15.0)
+                make.centerX.equalToSuperview()
+                make.height.equalTo(0.047 * screenSize.width)
+                make.width.equalToSuperview()
+                make.bottom.equalToSuperview()
             }
 
             bgView.snp.remakeConstraints { make in
-                make.bottom.equalTo(label.snp.top).offset(-10.0)
-                make.left.equalToSuperview().priority(250.0)
-                make.right.equalToSuperview().priority(250.0)
-                make.centerX.equalToSuperview()
+                make.center.equalToSuperview()
                 make.height.equalTo(buttonSize)
                 make.width.equalTo(buttonSize)
             }
@@ -164,8 +178,8 @@ class FeedItem: UICollectionViewCell {
             }
 
             badgeImage.snp.remakeConstraints { make in
-                let imageSize = buttonSize * 0.4
-                make.trailing.equalTo(bgView.snp.trailing).inset(-5.0)
+                let imageSize = buttonSize * 0.33
+                make.trailing.equalTo(bgView.snp.trailing).inset(screenSize.width*0.005)
                 make.top.equalTo(bgView.snp.top)
                 make.height.equalTo(imageSize)
                 make.width.equalTo(imageSize)
